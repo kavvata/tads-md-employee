@@ -19,8 +19,12 @@ from employees e
          join dept_emp de on e.emp_no = de.emp_no
          join titles t on t.emp_no = e.emp_no
          join departments d on de.dept_no = d.dept_no
-         left join salaries s on e.emp_no = s.emp_no and t.from_date <= s.from_date and t.to_date >= s.from_date
+         left join salaries s on t.emp_no = s.emp_no and (
+            (s.to_date >= t.from_date and s.to_date <= t.to_date)
+            or (t.from_date >= s.from_date and t.to_date <= s.to_date)
+         )
          left join dept_manager dm
-                   on dm.dept_no = de.dept_no and dm.from_date <= s.from_date and dm.to_date >= s.from_date
+                   on dm.dept_no = de.dept_no and
+                      ((dm.from_date <= s.from_date and dm.to_date >= s.from_date))
          left join (select first_name, last_name, emp_no from employees) c on c.emp_no = dm.emp_no
-order by e.emp_no, de.to_date, t.to_date;
+order by e.emp_no, t.from_date, dm.from_date;
